@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Citizen registration | CivicResolve</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+  <header class="site-header"><nav class="navbar container" aria-label="Main navigation"><a class="navbar-brand brand" href="/">Civic<span>Resolve</span></a><a class="nav-link" href="/login.html">Already registered? Sign in</a></nav></header>
+  <main class="page-wrap container">
+    <div class="page-intro"><span class="eyebrow">Citizen account</span><h1>Create your account</h1><p>Register once to securely sign in and see grievances you submit while signed in.</p></div>
+    <section class="form-panel registration-panel">
+      <div id="register-message" class="alert d-none" role="status" aria-live="polite"></div>
+      <form id="register-form" novalidate>
+        <div class="form-section-title"><span>01</span><div><h2>Personal information</h2><p>Your age is calculated from your date of birth.</p></div></div>
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label" for="name">Full name <span class="required">*</span></label><input class="form-control" id="name" name="name" required minlength="2" maxlength="100" autocomplete="name"><div class="invalid-feedback" data-error="name">Enter your full name (2–100 characters).</div></div>
+          <div class="col-md-6"><label class="form-label" for="dateOfBirth">Date of birth <span class="required">*</span></label><input class="form-control" type="date" id="dateOfBirth" name="dateOfBirth" required autocomplete="bday"><div class="invalid-feedback" data-error="dateOfBirth">Choose a valid date of birth and meet the minimum registration age.</div></div>
+          <div class="col-md-6"><label class="form-label" for="age">Age</label><input class="form-control" id="age" name="age" readonly aria-describedby="age-hint" placeholder="Calculated from date of birth"><div class="form-hint" id="age-hint">Minimum registration age: 18</div></div>
+          <div class="col-md-6"><label class="form-label" for="gender">Gender <span class="text-secondary fw-normal">(optional)</span></label><select class="form-select" id="gender" name="gender"><option value="">Prefer not to specify</option><option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select><div class="invalid-feedback" data-error="gender">Choose a valid option.</div></div>
+        </div>
+        <hr class="form-divider">
+        <div class="form-section-title"><span>02</span><div><h2>Contact information</h2><p>Use details where you can be reached about your account.</p></div></div>
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label" for="email">Email address <span class="required">*</span></label><input class="form-control" type="email" id="email" name="email" required maxlength="254" autocomplete="email"><div class="invalid-feedback" data-error="email">Enter a valid email address.</div></div>
+          <div class="col-sm-5 col-md-3"><label class="form-label" for="phoneCountryCode">Country calling code <span class="required">*</span></label><input class="form-control" id="phoneCountryCode" name="phoneCountryCode" value="+91" required pattern="\+[1-9][0-9]{0,2}" maxlength="4" inputmode="tel" aria-describedby="calling-code-hint"><div class="form-hint" id="calling-code-hint">Example: +91</div><div class="invalid-feedback" data-error="phoneCountryCode">Enter a valid code, such as +91.</div></div>
+          <div class="col-sm-7 col-md-3"><label class="form-label" for="phoneNumber">Mobile number <span class="required">*</span></label><input class="form-control" type="tel" id="phoneNumber" name="phoneNumber" required minlength="6" maxlength="20" inputmode="tel" autocomplete="tel-national"><div class="invalid-feedback" data-error="phoneNumber">Enter a valid national phone number.</div></div>
+          <div class="col-md-6"><label class="form-label" for="country">Country <span class="required">*</span></label><input class="form-control" id="country" name="country" value="India" required maxlength="80" autocomplete="country-name"><div class="invalid-feedback" data-error="country">Enter your country.</div></div>
+          <div class="col-md-6"><label class="form-label" for="state">State or region <span class="required">*</span></label><input class="form-control" id="state" name="state" required maxlength="100" autocomplete="address-level1"><div class="invalid-feedback" data-error="state">Enter your state or region.</div></div>
+          <div class="col-md-6"><label class="form-label" for="city">City <span class="required">*</span></label><input class="form-control" id="city" name="city" required maxlength="100" autocomplete="address-level2"><div class="invalid-feedback" data-error="city">Enter your city.</div></div>
+          <div class="col-md-6"><label class="form-label" for="postalCode">PIN or postal code <span class="required">*</span></label><input class="form-control" id="postalCode" name="postalCode" required minlength="3" maxlength="12" autocomplete="postal-code"><div class="invalid-feedback" data-error="postalCode">Enter a valid PIN or postal code (Indian PIN codes have 6 digits).</div></div>
+        </div>
+        <hr class="form-divider">
+        <div class="form-section-title"><span>03</span><div><h2>Account security</h2><p>Choose a strong password that you do not use for another service.</p></div></div>
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label" for="password">Password <span class="required">*</span></label><div class="input-group"><input class="form-control" type="password" id="password" name="password" required minlength="10" maxlength="128" autocomplete="new-password" aria-describedby="password-hint"><button class="btn btn-outline-secondary password-toggle" type="button" data-toggle-password="password" aria-label="Show password" aria-pressed="false">Show</button></div><div class="form-hint" id="password-hint">10+ characters with uppercase, lowercase, number and symbol.</div><div class="invalid-feedback" data-error="password">Use a strong password that meets all listed requirements.</div></div>
+          <div class="col-md-6"><label class="form-label" for="confirmPassword">Confirm password <span class="required">*</span></label><div class="input-group"><input class="form-control" type="password" id="confirmPassword" name="confirmPassword" required maxlength="128" autocomplete="new-password"><button class="btn btn-outline-secondary password-toggle" type="button" data-toggle-password="confirmPassword" aria-label="Show password" aria-pressed="false">Show</button></div><div class="invalid-feedback" data-error="confirmPassword">Passwords must match.</div></div>
+          <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" id="acceptTerms" name="acceptTerms" required><label class="form-check-label" for="acceptTerms">I accept the <a href="/terms.html">Terms and Conditions</a>. <span class="required">*</span></label><div class="invalid-feedback" data-error="acceptTerms">Accept the Terms and Conditions to continue.</div></div></div>
+          <div class="col-12"><p class="privacy-notice mb-0"><strong>Privacy notice:</strong> Your registration details are used to manage your account and grievances. Your password is stored as a secure hash. Do not enter Aadhaar numbers or passwords used for other services.</p></div>
+        </div>
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mt-4"><span class="form-hint">Required fields are marked with <span class="required">*</span>.</span><button class="btn btn-primary btn-lg" id="register-button" type="submit">Create citizen account</button></div>
+      </form>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="container d-flex justify-content-between"><span>Smart Grievance Management System</span><a href="/">Back to home</a></div></footer>
+  <script src="/js/register.js"></script>
+</body>
+</html>

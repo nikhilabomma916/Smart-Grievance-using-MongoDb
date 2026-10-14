@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Submit a grievance | CivicResolve</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+  <header class="site-header"><nav class="navbar navbar-expand-lg container" aria-label="Main navigation"><a class="navbar-brand brand" href="/">Civic<span>Resolve</span></a><button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button><div class="collapse navbar-collapse" id="mainNav"><div class="navbar-nav ms-auto align-items-lg-center gap-lg-3"><a class="nav-link" href="/">Home</a><a class="nav-link active" href="/submit-grievance.html">Submit grievance</a><a class="nav-link" href="/citizen-dashboard.html">My dashboard</a><a class="btn btn-outline-primary btn-sm px-3" href="/login.html">Sign in</a></div></div></nav></header>
+  <main class="page-wrap container">
+    <div class="page-intro"><span class="eyebrow">Citizen services</span><h1>Submit a grievance</h1><p>Signed in as <strong id="signed-in-name">your citizen account</strong>. Your account details are used to contact you; enter the location of the civic issue below.</p></div>
+    <section class="form-panel">
+      <div id="form-message" class="alert d-none" role="status" aria-live="polite"></div>
+      <form id="grievance-form" novalidate>
+        <div class="form-section-title"><span>01</span><div><h2>About the issue</h2><p>Choose a category and explain what you observed. Routing is determined by the server.</p></div></div>
+        <input type="hidden" name="generatedDescription" id="generated-description-value">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label" for="category">Category <span class="required">*</span></label><select class="form-select" id="category" name="category" required><option value="">Choose a category</option><option>Pothole or damaged road</option><option>Water leakage or water supply problem</option><option>Drainage blockage or overflow</option><option>Garbage overflow or sanitation issue</option><option>Electricity pole, streetlight or power-related issue</option><option>Fallen tree or dangerous branches</option><option>Other civic issue</option></select><div class="invalid-feedback">Select a category.</div></div>
+          <div class="col-12"><label class="form-label" for="title">Short title <span class="required">*</span></label><input class="form-control" id="title" name="title" required minlength="5" maxlength="120" placeholder="For example: Streetlight not working near the park"><div class="invalid-feedback">Enter a title between 5 and 120 characters.</div></div>
+          <div class="col-12"><label class="form-label" for="description">Description <span class="required">*</span></label><textarea class="form-control" id="description" name="description" required minlength="10" maxlength="5000" rows="5" placeholder="Describe what you observed. Do not guess the cause."></textarea><div class="form-hint">10–5000 characters. Review and edit any suggested text before submitting.</div><div class="invalid-feedback">Enter a description between 10 and 5000 characters.</div></div>
+          <div class="col-12">
+            <label class="form-label" for="description-notes">Description assistance (optional)</label>
+            <div class="input-group"><input class="form-control" id="description-notes" maxlength="1000" placeholder="A few observed facts, e.g. large pothole, road, near school"><button class="btn btn-outline-primary" id="generate-description" type="button">Generate Description</button></div>
+            <div id="description-helper-message" class="form-hint" aria-live="polite">The template helper uses only the words you provide and does not inspect uploaded images. A configured text provider is optional.</div>
+          </div>
+        </div>
+        <hr class="form-divider">
+        <div class="form-section-title"><span>02</span><div><h2>Issue location</h2><p>Location information helps route the report to the relevant service team.</p></div></div>
+        <p class="form-hint">You can enter the address manually. Current location is accessed only after you click the button and grant browser permission. GPS coordinates alone do not identify an exact street address.</p>
+        <div class="mb-3"><button class="btn btn-outline-primary btn-sm" id="use-location" type="button">Use My Current Location</button><span class="ms-2 form-hint" id="location-message" role="status" aria-live="polite"></span></div>
+        <input type="hidden" name="latitude" id="latitude"><input type="hidden" name="longitude" id="longitude">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label" for="street">Street or road name <span class="required">*</span></label><input class="form-control" id="street" name="street" required maxlength="160" autocomplete="address-line1"><div class="invalid-feedback">Enter a street or road name.</div></div>
+          <div class="col-md-6"><label class="form-label" for="locality">Area or locality <span class="required">*</span></label><input class="form-control" id="locality" name="locality" required maxlength="120" autocomplete="address-line2"><div class="invalid-feedback">Enter an area or locality.</div></div>
+          <div class="col-md-4"><label class="form-label" for="city">City <span class="required">*</span></label><input class="form-control" id="city" name="city" required maxlength="100" autocomplete="address-level2"><div class="invalid-feedback">Enter a city.</div></div>
+          <div class="col-md-4"><label class="form-label" for="state">State <span class="required">*</span></label><input class="form-control" id="state" name="state" required maxlength="100" autocomplete="address-level1"><div class="invalid-feedback">Enter a state.</div></div>
+          <div class="col-md-4"><label class="form-label" for="postalCode">PIN code <span class="required">*</span></label><input class="form-control" id="postalCode" name="postalCode" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="postal-code"><div class="invalid-feedback">Enter a six-digit PIN code.</div></div>
+          <div class="col-12"><label class="form-label" for="landmark">Landmark or nearby building <span class="required">*</span></label><input class="form-control" id="landmark" name="landmark" required maxlength="160" placeholder="For example: opposite the public library"><div class="invalid-feedback">Enter a nearby landmark.</div></div>
+        </div>
+        <hr class="form-divider">
+        <div class="form-section-title"><span>03</span><div><h2>Supporting images</h2><p>Optional JPG, PNG, or WEBP evidence. Up to three images, 5 MB each.</p></div></div>
+        <div class="mb-3"><label class="form-label" for="images">Choose images</label><input class="form-control" id="images" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple aria-describedby="image-help"><div class="form-hint" id="image-help">Images are private and available only to you and authorized officers for this grievance.</div></div>
+        <div id="image-previews" class="row g-3" aria-live="polite"></div>
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mt-4"><span class="form-hint">Your ID appears after the server confirms it was saved.</span><button class="btn btn-primary btn-lg" id="submit-button" type="submit">Submit grievance</button></div>
+      </form>
+      <div id="success-panel" class="success-panel d-none" role="status" aria-live="polite"><span class="success-icon" aria-hidden="true">✓</span><h2>Grievance submitted</h2><p>Your details were saved. Keep this grievance ID to track progress.</p><div class="complaint-id" id="new-complaint-id"></div><a id="track-new-link" class="btn btn-primary" href="/citizen-dashboard.html">Open citizen dashboard</a> <button class="btn btn-outline-primary" id="submit-another" type="button">Submit another</button></div>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="container d-flex justify-content-between"><span>Smart Grievance Management System</span><a href="/">Back to home</a></div></footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script><script src="/js/submit.js"></script>
+</body>
+</html>

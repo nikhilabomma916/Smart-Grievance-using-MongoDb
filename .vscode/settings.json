@@ -1,0 +1,10 @@
+{
+    "python.terminal.useEnvFile": true,
+    "search.useGlobalIgnoreFiles": true,
+    "files.exclude": {
+        "": true
+    },
+    "search.exclude": {
+        "": true
+    }
+}
