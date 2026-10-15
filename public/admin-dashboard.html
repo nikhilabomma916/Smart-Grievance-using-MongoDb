@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Super Admin console for cross-department grievance management.">
+  <title>Super Admin | CivicResolve</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <link href="/css/admin.css" rel="stylesheet">
+</head>
+<body class="admin-body">
+  <header class="site-header admin-header">
+    <nav class="navbar navbar-expand-xl container" aria-label="Super Admin navigation">
+      <a class="navbar-brand brand" href="/admin-dashboard.html">Civic<span>Resolve</span><small class="brand-tag">SUPER ADMIN</small></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav" aria-controls="adminNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse" id="adminNav">
+        <div class="navbar-nav ms-auto align-items-xl-center gap-xl-1">
+          <a class="nav-link active" href="#grievances">All grievances</a>
+          <a class="nav-link" href="#departments">Departments</a>
+          <a class="nav-link" href="#officers">Officers</a>
+          <a class="nav-link" href="#reports">Reports</a>
+          <a class="nav-link" href="#audit">Audit logs</a>
+        </div>
+        <div class="admin-profile ms-xl-3">
+          <span class="admin-avatar" aria-hidden="true">SA</span>
+          <span><strong id="admin-name">Super Admin</strong><small id="admin-email">Loading profile…</small></span>
+          <button class="btn btn-outline-primary btn-sm ms-2" id="logout-button" type="button">Sign out</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main class="container admin-main">
+    <div id="admin-message" class="alert d-none" role="status" aria-live="polite"></div>
+
+    <section id="overview" class="admin-section">
+      <div class="admin-heading">
+        <div><span class="eyebrow">System administration</span><h1>Super Admin dashboard</h1><p>Cross-department service health, workload, and performance.</p></div>
+        <button class="btn btn-outline-primary" id="refresh-button" type="button">Refresh data</button>
+      </div>
+      <div class="admin-filters card-panel mb-4">
+        <label class="filter-field"><span>From</span><input class="form-control" id="overview-from" type="date"></label>
+        <label class="filter-field"><span>To</span><input class="form-control" id="overview-to" type="date"></label>
+        <label class="filter-field"><span>Department</span><select class="form-select" id="overview-department"><option value="">All departments</option></select></label>
+        <label class="filter-field"><span>Category</span><select class="form-select" id="overview-category"><option value="">All categories</option></select></label>
+        <label class="filter-field"><span>Priority</span><select class="form-select" id="overview-priority"><option value="">All priorities</option><option>Low</option><option>Medium</option><option>High</option><option>Urgent</option></select></label>
+        <label class="filter-field"><span>Status</span><select class="form-select" id="overview-status"><option value="">All statuses</option><option>Pending</option><option>Assigned</option><option>In Progress</option><option>Resolved</option><option>Rejected</option></select></label>
+        <button class="btn btn-primary" id="apply-overview-filters" type="button">Apply filters</button>
+      </div>
+      <div class="row g-3 admin-stat-grid" id="overview-stats" aria-label="System statistics">
+        <div class="col-6 col-lg-3"><article class="admin-stat"><span>Total grievances</span><strong data-stat="total">—</strong></article></div>
+        <div class="col-6 col-lg-3"><article class="admin-stat"><span>Pending</span><strong data-stat="pending">—</strong></article></div>
+        <div class="col-6 col-lg-3"><article class="admin-stat"><span>In progress</span><strong data-stat="inProgress">—</strong></article></div>
+        <div class="col-6 col-lg-3"><article class="admin-stat"><span>Resolved</span><strong data-stat="resolved">—</strong></article></div>
+        <div class="col-6 col-lg-3"><article class="admin-stat"><span>Escalated</span><strong data-stat="escalated">—</strong></article></div>
+        <div class="col-6 col-lg-3"><article class="admin-stat"><span>Departments</span><strong data-stat="departments">—</strong></article></div>
+        <div class="col-6 col-lg-3"><article class="admin-stat"><span>Officers</span><strong data-stat="officers">—</strong></article></div>
+        <div class="col-6 col-lg-3"><article class="admin-stat"><span>Overdue</span><strong data-stat="overdue">—</strong></article></div>
+      </div>
+      <div class="row g-3 mt-1">
+        <div class="col-lg-6"><article class="card-panel chart-panel"><div class="panel-heading"><div><h2>Grievances by department</h2><p>Submitted records in the selected range</p></div></div><div id="department-chart" class="horizontal-chart" aria-live="polite"></div></article></div>
+        <div class="col-lg-6"><article class="card-panel chart-panel"><div class="panel-heading"><div><h2>Status distribution</h2><p>Current status across filtered records</p></div></div><div id="status-chart" class="horizontal-chart" aria-live="polite"></div></article></div>
+        <div class="col-lg-7"><article class="card-panel chart-panel"><div class="panel-heading"><div><h2>Monthly grievance trends</h2><p>Submissions by month</p></div></div><div id="monthly-chart" class="monthly-chart" aria-live="polite"></div></article></div>
+        <div class="col-lg-5"><article class="card-panel chart-panel"><div class="panel-heading"><div><h2>Overdue and escalated</h2><p>Urgent administrative attention</p></div></div><div id="attention-chart" class="horizontal-chart" aria-live="polite"></div></article></div>
+      </div>
+    </section>
+
+    <section id="grievances" class="admin-section">
+      <div class="admin-heading"><div><span class="eyebrow">Cross-department queue</span><h2>All grievances</h2><p>Search, inspect, assign, and update records. Changes are saved to MongoDB.</p></div></div>
+      <article class="card-panel">
+        <div class="table-toolbar">
+          <div class="toolbar-filters">
+            <input class="form-control" id="grievance-search" type="search" placeholder="Search ID, citizen, or title" aria-label="Search grievances">
+            <select class="form-select" id="grievance-status"><option value="">All statuses</option><option>Pending</option><option>Assigned</option><option>In Progress</option><option>Resolved</option><option>Rejected</option></select>
+            <select class="form-select" id="grievance-department"><option value="">All departments</option></select>
+            <select class="form-select" id="grievance-category"><option value="">All categories</option></select>
+            <select class="form-select" id="grievance-priority"><option value="">All priorities</option><option>Low</option><option>Medium</option><option>High</option><option>Urgent</option></select>
+            <label class="visually-hidden" for="grievance-from">Submitted from</label><input class="form-control" id="grievance-from" type="date">
+            <label class="visually-hidden" for="grievance-to">Submitted through</label><input class="form-control" id="grievance-to" type="date">
+            <select class="form-select" id="grievance-sort"><option value="createdAt:desc">Newest first</option><option value="createdAt:asc">Oldest first</option><option value="updatedAt:desc">Recently updated</option><option value="priority:desc">Priority</option><option value="category:asc">Category</option><option value="status:asc">Status</option></select>
+          </div>
+          <span class="text-secondary small" id="grievance-count">Loading…</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle admin-table"><thead><tr><th>Grievance</th><th>Citizen</th><th>Category / department</th><th>Officer</th><th>Priority</th><th>Submitted / SLA</th><th>Status</th><th>Actions</th></tr></thead><tbody id="grievance-rows"><tr><td colspan="8" class="empty-cell">Loading grievances…</td></tr></tbody></table>
+        </div>
+        <div class="table-pagination"><button class="btn btn-outline-primary btn-sm" id="grievance-prev" type="button">Previous</button><span id="grievance-page">Page 1</span><button class="btn btn-outline-primary btn-sm" id="grievance-next" type="button">Next</button></div>
+      </article>
+    </section>
+
+    <section id="departments" class="admin-section">
+      <div class="admin-heading"><div><span class="eyebrow">Organization</span><h2>Department management</h2><p>Legacy department names are discovered from existing grievance and officer records.</p></div><div class="d-flex flex-wrap gap-2"><button class="btn btn-outline-primary" id="add-recommended-departments" type="button">Add recommended departments</button><button class="btn btn-primary" id="add-department" type="button">Add department</button></div></div>
+      <article class="card-panel table-responsive">
+        <table class="table align-middle admin-table"><thead><tr><th>Department</th><th>Officers</th><th>Total</th><th>Pending</th><th>In progress</th><th>Resolved</th><th>Overdue</th><th>Resolution rate</th><th>Actions</th></tr></thead><tbody id="department-rows"><tr><td colspan="9" class="empty-cell">Loading departments…</td></tr></tbody></table>
+      </article>
+    </section>
+
+    <section id="officers" class="admin-section">
+      <div class="admin-heading"><div><span class="eyebrow">Team accounts</span><h2>Officer management</h2><p>Manage department access, account status, workload, and password resets.</p></div><button class="btn btn-primary" id="add-officer" type="button">Add officer</button></div>
+      <article class="card-panel">
+        <div class="table-toolbar">
+          <div class="toolbar-filters">
+            <input class="form-control" id="officer-search" type="search" placeholder="Search officers" aria-label="Search officers">
+            <select class="form-select" id="officer-department-filter"><option value="">All departments</option></select>
+            <select class="form-select" id="officer-active-filter"><option value="">All accounts</option><option value="true">Active</option><option value="false">Inactive</option></select>
+          </div>
+          <span class="text-secondary small" id="officer-count">Loading…</span>
+        </div>
+        <div class="table-responsive"><table class="table align-middle admin-table"><thead><tr><th>Officer</th><th>Department</th><th>Assigned</th><th>Pending</th><th>In progress</th><th>Resolved</th><th>Overdue</th><th>Account</th><th>Actions</th></tr></thead><tbody id="officer-rows"><tr><td colspan="9" class="empty-cell">Loading officers…</td></tr></tbody></table></div>
+        <div class="table-pagination"><button class="btn btn-outline-primary btn-sm" id="officer-prev" type="button">Previous</button><span id="officer-page">Page 1</span><button class="btn btn-outline-primary btn-sm" id="officer-next" type="button">Next</button></div>
+      </article>
+    </section>
+
+    <section id="reports" class="admin-section">
+      <div class="admin-heading"><div><span class="eyebrow">Performance and accountability</span><h2>Reports and analytics</h2><p>Computed from grievance and assignment records in MongoDB.</p></div><button class="btn btn-outline-primary" id="export-reports" type="button">Export CSV</button></div>
+      <div class="row g-3">
+        <div class="col-12"><article class="card-panel table-responsive"><h3 class="table-title">Department performance</h3><table class="table align-middle admin-table"><thead><tr><th>Department</th><th>Total</th><th>Pending</th><th>Resolved</th><th>Escalated</th><th>Resolution rate</th><th>Avg. resolution days</th></tr></thead><tbody id="department-report-rows"><tr><td colspan="7" class="empty-cell">Loading report…</td></tr></tbody></table></article></div>
+        <div class="col-12"><article class="card-panel table-responsive"><h3 class="table-title">Officer performance</h3><table class="table align-middle admin-table"><thead><tr><th>Officer</th><th>Department</th><th>Assigned</th><th>Resolved</th><th>Overdue</th><th>Resolution rate</th><th>Avg. resolution days</th></tr></thead><tbody id="officer-report-rows"><tr><td colspan="7" class="empty-cell">Loading report…</td></tr></tbody></table></article></div>
+        <div class="col-12"><article class="card-panel table-responsive"><h3 class="table-title">Monthly and yearly trends</h3><table class="table align-middle admin-table"><thead><tr><th>Period</th><th>Submissions</th><th>Resolved</th></tr></thead><tbody id="trend-report-rows"><tr><td colspan="3" class="empty-cell">Loading trends…</td></tr></tbody></table></article></div>
+        <div class="col-12" id="overdue-report-panel"><article class="card-panel table-responsive"><h3 class="table-title">Overdue grievance report</h3><table class="table align-middle admin-table"><thead><tr><th>Grievance</th><th>Department</th><th>Officer</th><th>SLA deadline</th><th>Status</th></tr></thead><tbody id="overdue-report-rows"><tr><td colspan="5" class="empty-cell">Loading overdue records…</td></tr></tbody></table></article></div>
+        <div class="col-12" id="escalation-report-panel"><article class="card-panel table-responsive"><h3 class="table-title">Escalation report</h3><table class="table align-middle admin-table"><thead><tr><th>Grievance</th><th>Department</th><th>Officer</th><th>Priority</th><th>Status</th></tr></thead><tbody id="escalation-report-rows"><tr><td colspan="5" class="empty-cell">Loading escalations…</td></tr></table></article></div>
+      </div>
+    </section>
+
+    <section id="audit" class="admin-section">
+      <div class="admin-heading"><div><span class="eyebrow">Immutable accountability trail</span><h2>Audit logs</h2><p>Administrative actions are recorded with actor, record, timestamp, and change details.</p></div></div>
+      <article class="card-panel">
+        <div class="table-responsive"><table class="table align-middle admin-table"><thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Record</th><th>Change details</th></tr></thead><tbody id="audit-rows"><tr><td colspan="5" class="empty-cell">Loading audit records…</td></tr></tbody></table></div>
+        <div class="table-pagination"><button class="btn btn-outline-primary btn-sm" id="audit-prev" type="button">Previous</button><span id="audit-page">Page 1</span><button class="btn btn-outline-primary btn-sm" id="audit-next" type="button">Next</button></div>
+      </article>
+    </section>
+  </main>
+
+  <div class="modal fade" id="grievance-modal" tabindex="-1" aria-labelledby="grievance-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg"><div class="modal-content">
+      <form id="grievance-form">
+        <div class="modal-header"><div><h2 class="modal-title fs-5" id="grievance-modal-title">Update grievance</h2><p class="small text-secondary mb-0" id="grievance-modal-subtitle"></p></div><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <div class="modal-body"><div class="d-flex flex-wrap gap-2 mb-3"><button class="btn btn-outline-primary btn-sm quick-grievance-action" data-target="details" type="button">View details</button><button class="btn btn-outline-primary btn-sm quick-grievance-action" data-target="department" type="button">Change Department</button><button class="btn btn-outline-primary btn-sm quick-grievance-action" data-target="officer" type="button">Change Officer</button><button class="btn btn-outline-primary btn-sm quick-grievance-action" data-target="status" type="button">Change Status</button></div><div id="grievance-detail" class="grievance-detail mb-3"></div><div class="row g-3">
+          <div class="col-md-6"><label class="form-label" for="edit-grievance-department">Department</label><select class="form-select" id="edit-grievance-department" required></select></div>
+          <div class="col-md-6"><label class="form-label" for="edit-grievance-officer">Assigned officer</label><select class="form-select" id="edit-grievance-officer"><option value="">Unassigned</option></select></div>
+          <div class="col-md-4"><label class="form-label" for="edit-grievance-status">Status</label><select class="form-select" id="edit-grievance-status" required><option>Pending</option><option>Assigned</option><option>In Progress</option><option>Resolved</option><option>Rejected</option></select></div>
+          <div class="col-md-4"><label class="form-label" for="edit-grievance-priority">Priority</label><select class="form-select" id="edit-grievance-priority"><option>Low</option><option>Medium</option><option>High</option><option>Urgent</option></select></div>
+          <div class="col-md-4"><label class="form-label" for="edit-grievance-escalated">Escalation</label><select class="form-select" id="edit-grievance-escalated"><option value="false">Not escalated</option><option value="true">Escalated</option></select></div>
+          <div class="col-12"><label class="form-label" for="resolution-remarks">Resolution remarks</label><textarea class="form-control" id="resolution-remarks" maxlength="2000" rows="2"></textarea></div>
+          <div class="col-12"><label class="form-label" for="admin-note">Add internal administrative note</label><textarea class="form-control" id="admin-note" maxlength="2000" rows="2"></textarea></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary" type="submit">Save changes</button></div>
+      </form>
+    </div></div>
+  </div>
+  <div class="modal fade" id="department-modal" tabindex="-1" aria-labelledby="department-modal-title" aria-hidden="true">
+    <div class="modal-dialog"><div class="modal-content"><form id="department-form">
+      <div class="modal-header"><h2 class="modal-title fs-5" id="department-modal-title">Add department</h2><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body"><label class="form-label" for="department-name">Department name</label><input class="form-control mb-3" id="department-name" required minlength="2" maxlength="100"><label class="form-label" for="department-description">Description</label><textarea class="form-control mb-3" id="department-description" maxlength="500" rows="3"></textarea><label class="form-label" for="department-active">Account status</label><select class="form-select" id="department-active"><option value="true">Active</option><option value="false">Inactive</option></select></div>
+      <div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary" type="submit">Save department</button></div>
+    </form></div></div>
+  </div>
+  <div class="modal fade" id="officer-modal" tabindex="-1" aria-labelledby="officer-modal-title" aria-hidden="true">
+    <div class="modal-dialog"><div class="modal-content"><form id="officer-form">
+      <div class="modal-header"><h2 class="modal-title fs-5" id="officer-modal-title">Add officer</h2><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body"><input id="officer-id" type="hidden"><label class="form-label" for="officer-name">Full name</label><input class="form-control mb-3" id="officer-name" required minlength="2" maxlength="100"><label class="form-label" for="officer-email">Email</label><input class="form-control mb-3" id="officer-email-input" type="email" required maxlength="254"><label class="form-label" for="officer-department">Department</label><select class="form-select mb-3" id="officer-department" required></select><label class="form-label" for="officer-specialization">Specialization</label><input class="form-control mb-3" id="officer-specialization" maxlength="100"><label class="form-label" for="officer-password">Password <span class="text-secondary fw-normal" id="password-hint"></span></label><input class="form-control mb-3" id="officer-password" type="password" minlength="10" maxlength="128"><div class="form-text mb-3">10–128 characters, including uppercase, lowercase, number, and symbol.</div><label class="form-label" for="officer-active">Account status</label><select class="form-select" id="officer-active"><option value="true">Active</option><option value="false">Inactive</option></select></div>
+      <div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary" type="submit">Save officer</button></div>
+    </form></div></div>
+  </div>
+  <footer class="site-footer"><div class="container d-flex justify-content-between"><span>Super Admin workspace · Smart Grievance Management System</span><a href="/">Public portal</a></div></footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

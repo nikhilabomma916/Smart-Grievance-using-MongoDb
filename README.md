@@ -66,11 +66,16 @@ These credentials are for local development only. Replace them with unique crede
 
 - `/` — public portal and database-backed statistics.
 - `/register.html` — citizen registration with age and contact validation.
-- `/login.html` — shared citizen/officer login; the server determines the role and redirects to the correct dashboard.
+- `/login.html` — shared login; the server determines the citizen, officer, or configured Super Admin role and redirects accordingly.
 - `/submit-grievance.html` — available only to a signed-in citizen; server-bound account contact details, grievance form, location consent, and private evidence uploads.
 - `/citizen-dashboard.html` — citizen-only records, totals, photos, location, status, and timeline.
 - `/officer-dashboard.html` — department-scoped records, filters, evidence, and officer status/remarks actions.
+- `/admin-dashboard.html` — Super Admin-only cross-department overview, grievance assignment and workflow management, departments, officers, reports, escalations, and read-only audit logs.
 - `/track-grievance.html` — public limited tracking by grievance ID.
+
+The Super Admin account is provisioned only through `ADMIN_EMAIL` and `ADMIN_PASSWORD_HASH` in the server's private `.env` configuration. It is not a MongoDB officer account and cannot be granted through public registration or an admin API. Admin APIs re-check this role on the server; ordinary sessions cannot obtain cross-department access by changing client data. Deactivated citizen/officer accounts are revalidated against MongoDB on protected requests.
+
+Admin management discovers existing department names from grievance and officer records, then stores department descriptions and activation settings in the `departments` collection. It extends the existing grievance records with priority, SLA deadline, escalation flag, and private admin notes; notes are excluded from citizen/officer queries. Important admin changes are appended to `auditlogs` and there are no audit-log update or delete endpoints.
 
 Grievance departments are selected by the server from the category, never from citizen-provided department or officer values:
 
@@ -88,7 +93,7 @@ The server assigns the active department officer with the fewest active (`Assign
 
 ## Image uploads and location privacy
 
-Images must be JPG/JPEG, PNG, or WEBP; the server allows at most three images and 5 MB per image. It verifies file signatures, decodes and re-encodes the raster image (discarding embedded metadata), generates random filenames, and stores files under the ignored local `uploads` directory. Uploaded files are not exposed by static file hosting: image requests are checked against the signed-in citizen's ownership or an officer's authorized department.
+Images must be JPG/JPEG, PNG, or WEBP; the server allows at most three images and 5 MB per image. It verifies file signatures, decodes and re-encodes the raster image (discarding embedded metadata), generates random filenames, and stores files under the ignored local `uploads` directory. Uploaded files are not exposed by static file hosting: image requests are checked against the signed-in citizen's ownership, an officer's department, or the configured Super Admin role.
 
 Browser location permission is requested only when the citizen clicks **Use My Current Location**. Denial or unavailable GPS leaves manual address entry available. Coordinates do not prove an exact address; the citizen must review and confirm all address fields.
 
@@ -112,13 +117,20 @@ Express sessions are stored in the MongoDB `sessions` collection; the browser ho
 | --- | --- | --- | --- |
 | GET | `/api/health/db` | Public | Ping MongoDB and report connection health |
 | POST | `/api/auth/register` | Public, rate-limited | Create a citizen account |
-| POST | `/api/auth/login` | Public, rate-limited | Authenticate citizen/officer and start server-side session |
+| POST | `/api/auth/login` | Public, rate-limited | Authenticate citizen/officer/configured Super Admin and start server-side session |
 | POST | `/api/auth/logout` | Session | Destroy the session |
 | GET | `/api/auth/me` | Authenticated | Read current server-side account and role |
+| GET | `/api/admin/overview` | Super Admin | Database-backed counts and department, status, monthly, and resolution charts |
+| GET/PATCH | `/api/admin/grievances` and `/api/admin/grievances/:id` | Super Admin | Paginated cross-department records, filters, details, assignment, workflow, priority, escalation, and internal notes |
+| GET/POST/PATCH | `/api/admin/departments` | Super Admin | Discover, create, edit, activate, and inspect department workload |
+| POST | `/api/admin/departments/recommended` | Super Admin | Add recommended civic departments while reusing matching existing names |
+| GET/POST/PATCH | `/api/admin/officers` | Super Admin | Paginated officer management, department assignment, activation, and workload |
+| GET | `/api/admin/reports` | Super Admin | Department/officer performance, resolution time, monthly/yearly trends, overdue and escalation records |
+| GET | `/api/admin/audit-logs` | Super Admin | Paginated administrative audit history |
 | POST | `/api/grievances` | Citizen, rate-limited | Create a routed grievance with up to three images |
 | GET | `/api/grievances/my` | Citizen | List the signed-in citizen's grievance records |
-| GET | `/api/grievances/:id` | Authorized citizen/officer | Read one grievance and its status history |
-| GET | `/api/grievances/:id/images/:imageId` | Authorized citizen/officer | Retrieve private evidence image |
+| GET | `/api/grievances/:id` | Authorized citizen/officer/Super Admin | Read one grievance and its status history |
+| GET | `/api/grievances/:id/images/:imageId` | Authorized citizen/officer/Super Admin | Retrieve private evidence image |
 | POST | `/api/grievances/description-suggestion` | Citizen, rate-limited | Produce a template/provider description suggestion |
 | POST | `/api/grievances/reverse-geocode` | Citizen, rate-limited | Optional reverse-geocoding address suggestion |
 | GET | `/api/officer/grievances` | Officer | List only authorized department records |
@@ -141,4 +153,4 @@ To test protected request authorization in Postman, use its cookie jar: sign in 
 
 ## Changed application files
 
-Backend changes are in `server.js`, `models/User.js`, `models/Grievance.js`, `models/GrievanceHistory.js`, `middleware/auth.js`, `middleware/grievanceAccess.js`, `routes/auth.js`, `routes/citizen.js`, `routes/grievances.js`, `routes/officer.js`, and `services/descriptionSuggestion.js`. Run-once officer account creation is implemented by `scripts/seed-officers.js`. The citizen submission and dashboards are in `public/submit-grievance.html`, `public/js/submit.js`, `public/citizen-dashboard.html`, `public/js/citizen.js`, `public/officer-dashboard.html`, `public/js/officer.js`, and `public/css/style.css`. Configuration is documented in `.env.example`; uploaded files and secrets are excluded through `.gitignore`.
+Backend changes are in `server.js`, the models under `models/`, `middleware/auth.js`, `middleware/grievanceAccess.js`, `routes/auth.js`, and `routes/admin.js`. Run-once officer account creation is implemented by `scripts/seed-officers.js`. The admin dashboard is in `public/admin-dashboard.html`, `public/js/admin.js`, and `public/css/admin.css`; citizen and officer interfaces remain in place. Configuration is documented in `.env.example`; uploaded files and secrets are excluded through `.gitignore`.

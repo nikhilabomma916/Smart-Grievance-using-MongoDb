@@ -175,26 +175,10 @@ router.post("/login", loginLimit, async (req, res, next) => {
       }
       await setSession(req, {
         email,
-        role: "officer",
+        role: "superadmin",
         name: "System administrator",
-        department: "System Administration",
-        authorizedDepartments: [
-          "Roads Department",
-          "Water Department",
-          "Drainage Department",
-          "Sanitation Department",
-          "Electricity Department",
-          "Forestry Department",
-          "General Grievance Queue",
-          "Roads and Public Works",
-          "Water Supply",
-          "Electricity",
-          "Public Safety",
-          "General Administration",
-          "Unassigned"
-        ]
       });
-      return res.json({ success: true, data: { email, role: "officer" } });
+      return res.json({ success: true, data: { email, role: "superadmin" } });
     }
 
     const user = await User.findOne({ email }).select("+passwordHash");

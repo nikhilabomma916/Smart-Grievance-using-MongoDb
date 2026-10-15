@@ -32,34 +32,38 @@ if (demoOfficerTools && demoOfficerSelect) {
       const result = await response.json();
       if (!result.success || !Array.isArray(result.data) || result.data.length === 0) return;
 
-      for (const officer of result.data) {
+      for (const account of result.data) {
         const option = document.createElement("option");
-        option.value = officer.email;
-        option.textContent = `${officer.department} — ${officer.name}`;
+        option.value = account.email;
+        option.textContent = account.role === "superadmin"
+          ? `Super Admin — ${account.name}`
+          : `${account.department} — ${account.name}`;
         demoOfficerSelect.append(option);
       }
       demoOfficerTools.classList.remove("d-none");
     })
     .catch((error) => {
-      console.warn("Demo officer sign-in options could not be loaded:", error);
+      console.warn("Demo sign-in options could not be loaded:", error);
     });
 
   demoOfficerSelect.addEventListener("change", async () => {
     if (!demoOfficerSelect.value) return;
     try {
       const response = await fetch("/api/auth/demo-officers");
-      if (!response.ok) throw new Error("Demo officer accounts are unavailable.");
+      if (!response.ok) throw new Error("Demo sign-in accounts are unavailable.");
       const result = await response.json();
-      const officer = result.data.find((account) => account.email === demoOfficerSelect.value);
-      if (!officer) throw new Error("The selected demo officer account is unavailable.");
-      loginForm.elements.email.value = officer.email;
-      loginForm.elements.password.value = officer.password;
+      const account = result.data.find((entry) => entry.email === demoOfficerSelect.value);
+      if (!account) throw new Error("The selected demo account is unavailable.");
+      loginForm.elements.email.value = account.email;
+      loginForm.elements.password.value = account.password;
       loginForm.classList.remove("was-validated");
       loginMessage.className = "alert alert-info";
-      loginMessage.textContent = `${officer.department} demo credentials filled in. Click Sign in to continue.`;
+      loginMessage.textContent = account.role === "superadmin"
+        ? "Super Admin demo credentials filled in. Click Sign in to continue."
+        : `${account.department} demo credentials filled in. Click Sign in to continue.`;
     } catch (error) {
       loginMessage.className = "alert alert-danger";
-      loginMessage.textContent = error.message || "Unable to load demo officer credentials.";
+      loginMessage.textContent = error.message || "Unable to load demo credentials.";
     }
   });
 }
@@ -93,7 +97,9 @@ loginForm.addEventListener("submit", async (event) => {
       ? "/citizen-dashboard.html"
       : result.data.role === "officer"
         ? "/officer-dashboard.html"
-        : null;
+        : result.data.role === "superadmin"
+          ? "/admin-dashboard.html"
+          : null;
     if (!destination) throw new Error("The account has an unsupported role.");
     window.location.replace(destination);
   } catch (error) {

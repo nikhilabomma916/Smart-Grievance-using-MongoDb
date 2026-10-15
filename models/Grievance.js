@@ -40,6 +40,15 @@ const grievanceSchema = new mongoose.Schema(
     assignedOfficerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null, index: true },
     assignedOfficerName: { type: String, trim: true, maxlength: 100 },
     officerRemarks: { type: String, trim: true, maxlength: 2000 },
+    priority: { type: String, enum: ["Low", "Medium", "High", "Urgent"], default: "Medium" },
+    slaDeadline: { type: Date, default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+    isEscalated: { type: Boolean, default: false },
+    adminNotes: [{
+      authorId: { type: mongoose.Schema.Types.ObjectId, default: null },
+      authorName: { type: String, required: true, maxlength: 100 },
+      message: { type: String, required: true, trim: true, maxlength: 2000 },
+      createdAt: { type: Date, default: Date.now }
+    }],
     status: {
       type: String,
       enum: ["Pending", "Assigned", "In Progress", "Resolved", "Rejected"],
@@ -48,6 +57,8 @@ const grievanceSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+grievanceSchema.path("adminNotes").options.select = false;
 
 module.exports =
   mongoose.models.Grievance || mongoose.model("Grievance", grievanceSchema);

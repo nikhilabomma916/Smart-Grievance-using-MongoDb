@@ -11,7 +11,9 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--canvas); color: var(--ink); font-family: Inter, "Segoe UI", Arial, sans-serif; line-height: 1.55; }
+html { overflow-y: auto; scroll-behavior: smooth; }
+body { min-height: 100vh; margin: 0; overflow-x: hidden; background: var(--canvas); color: var(--ink); font-family: Inter, "Segoe UI", Arial, sans-serif; line-height: 1.55; }
+main, .page-wrap, .admin-main { overflow: visible; }
 a { color: var(--blue); }
 .site-header { background: var(--surface); border-bottom: 1px solid var(--line); }
 .site-header .navbar { min-height: 74px; }

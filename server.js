@@ -10,13 +10,16 @@ const { connectDatabase } = require("./config/database");
 const Grievance = require("./models/Grievance");
 const User = require("./models/User");
 const GrievanceHistory = require("./models/GrievanceHistory");
+const Department = require("./models/Department");
+const AuditLog = require("./models/AuditLog");
 const authRoutes = require("./routes/auth");
 const citizenRoutes = require("./routes/citizen");
 const dashboardRoutes = require("./routes/dashboard");
 const grievanceRoutes = require("./routes/grievances");
 const officerRoutes = require("./routes/officer");
+const adminRoutes = require("./routes/admin");
 const { officerGrievanceScope } = require("./middleware/grievanceAccess");
-const { requireRole } = require("./middleware/auth");
+const { requireRole, requireSuperAdmin } = require("./middleware/auth");
 const demoOfficers = require("./config/demoOfficers");
 
 const app = express();
@@ -34,6 +37,9 @@ function configureRoutes() {
   app.get("/officer-dashboard.html", requireRole("officer"), (req, res) =>
     res.sendFile(path.join(publicDirectory, "officer-dashboard.html"))
   );
+  app.get("/admin-dashboard.html", requireSuperAdmin, (req, res) =>
+    res.sendFile(path.join(publicDirectory, "admin-dashboard.html"))
+  );
   app.get("/citizen-dashboard.html", requireRole("citizen"), (req, res) =>
     res.sendFile(path.join(publicDirectory, "citizen-dashboard.html"))
   );
@@ -48,15 +54,28 @@ function configureRoutes() {
     ) {
       return res.sendStatus(404);
     }
-    return res.json({
-      success: true,
-      data: demoOfficers.map(({ name, email, password, department }) => ({
-        name,
-        email,
-        password,
-        department
-      }))
-    });
+
+    const accounts = demoOfficers.map(({ name, email, password, department }) => ({
+      role: "officer",
+      name,
+      email,
+      password,
+      department
+    }));
+
+    const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+    const demoAdminPassword = process.env.DEMO_ADMIN_PASSWORD;
+    if (adminEmail && demoAdminPassword) {
+      accounts.push({
+        role: "superadmin",
+        name: "System administrator",
+        email: adminEmail,
+        password: demoAdminPassword,
+        department: "Super Admin"
+      });
+    }
+
+    return res.json({ success: true, data: accounts });
   });
   app.get("/api/auth/registration-config", (req, res) => {
     const configuredAge = Number.parseInt(process.env.CITIZEN_MIN_AGE || "18", 10);
@@ -97,6 +116,7 @@ function configureRoutes() {
   app.use("/api/grievances", grievanceRoutes);
   app.use("/api/officer", officerRoutes);
   app.use("/api/dashboard", dashboardRoutes);
+  app.use("/api/admin", adminRoutes);
   app.get("/api/admin/dashboard/stats", requireRole("officer"), async (req, res, next) => {
     try {
       const grouped = await Grievance.aggregate([
@@ -154,6 +174,8 @@ async function startServer() {
     await User.init();
     await Grievance.init();
     await GrievanceHistory.init();
+    await Department.init();
+    await AuditLog.init();
 
     const store = MongoStore.create({
       client: mongoose.connection.getClient(),
@@ -182,7 +204,7 @@ async function startServer() {
 
     configureRoutes();
     console.log(`[database] Connected to ${mongoose.connection.name} at ${mongoose.connection.host}`);
-    console.log("[database] User, grievance, and session collections are ready");
+    console.log("[database] User, grievance, department, audit, and session collections are ready");
     app.listen(port, () => {
       console.log(`[server] Listening at http://127.0.0.1:${port}`);
     });
